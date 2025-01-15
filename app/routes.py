@@ -1,9 +1,11 @@
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 from . import db
 from .models import Equipment
 from datetime import datetime
 
-@app.route('/equipment', methods=['GET'])
+main_bp = Blueprint('main_bp', __name__)
+
+@main_bp.route('/equipment', methods=['GET'])
 def get_all_equipment():
     equipment_list = Equipment.query.all()
     return jsonify([{
@@ -13,7 +15,7 @@ def get_all_equipment():
         'next_due': equipment.next_due.strftime('%Y-%m-%d')
     } for equipment in equipment_list])
     
-@app.route('/equipment', methods=['POST'])
+@main_bp.route('/equipment', methods=['POST'])
 def add_equipment():
     data = request.get_json()
     new_equipment = Equipment(
@@ -25,7 +27,7 @@ def add_equipment():
     db.session.commit()
     return jsonify({'id': new_equipment.id, 'message': 'Calibration added successfully'}), 201
 
-@app.route('/equipment/<int:id>', methods=['GET'])
+@main_bp.route('/equipment/<int:id>', methods=['GET'])
 def get_equipment(id):
     equipment = Equipment.query.get(id)
     return jsonify({
@@ -35,7 +37,7 @@ def get_equipment(id):
         'next_due': equipment.next_due.strftime('%Y-%m-%d')
     })
     
-@app.route('/equipment/<int:id>', methods=['PUT'])
+@main_bp.route('/equipment/<int:id>', methods=['PUT'])
 def update_equipment(id):
     equipment = Equipment.query.get_or_404(id)
     data = request.get_json()
@@ -45,7 +47,7 @@ def update_equipment(id):
     db.session.commit()
     return jsonify({'message': 'Calibration updated successfully'})
 
-@app.route('/equipment/<int:id>', methods=['DELETE'])
+@main_bp.route('/equipment/<int:id>', methods=['DELETE'])
 def delete_equipment(id):
     equipment = Equipment.query.get_or_404(id)
     db.session.delete(equipment)
